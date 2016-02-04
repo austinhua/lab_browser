@@ -67,7 +67,8 @@ public class BrowserView {
     private ResourceBundle myResources;
     // the data
     private BrowserModel myModel;
-
+    
+    
     /**
      * Create a view of the given model of a web browser.
      */
@@ -84,20 +85,24 @@ public class BrowserView {
         enableButtons();
         // create scene to hold UI
         myScene = new Scene(root, DEFAULT_SIZE.width, DEFAULT_SIZE.height);
-        //myScene.getStylesheets().add(DEFAULT_RESOURCE_PACKAGE + STYLESHEET);
+        myScene.getStylesheets().add(DEFAULT_RESOURCE_PACKAGE + STYLESHEET);
     }
 
     /**
      * Display given URL.
      */
     public void showPage (String url) {
-        URL valid = myModel.go(url);
-        if (valid != null) {
-            update(valid);
-        }
-        else {
-            showError("Could not load " + url);
-        }
+    	try {
+    		URL valid = myModel.go(url);
+    		if (valid != null) {
+    			update(valid);
+    		}
+    	}
+    	catch (BrowserException e) {
+    		//String.format(myResources.getString("ErrorOnGo"), url);
+    		showError(e.getMessage());
+
+    	}
     }
 
     /**
@@ -143,7 +148,7 @@ public class BrowserView {
     private void showFavorite (String favorite) {
         showPage(myModel.getFavorite(favorite).toString());
         // reset favorites ComboBox so the same choice can be made again
-        myFavorites.setValue(null);
+        //myFavorites.setValue(null);
     }
 
     // update just the view to display given URL
@@ -225,7 +230,15 @@ public class BrowserView {
     private Node makePreferencesPanel () {
         HBox result = new HBox();
         myFavorites = new ComboBox<String>();
-        // ADD REST OF CODE HERE
+        myFavorites.setOnAction(event -> {
+        	//System.out.println(myFavorites.getValue());
+        	showFavorite(myFavorites.getValue());
+        });
+        result.getChildren().add(myFavorites);
+        
+        result.getChildren().add(makeButton("AddFavoriteCommand", event -> {
+        	addFavorite();
+        }));
         result.getChildren().add(makeButton("SetHomeCommand", event -> {
             myModel.setHome();
             enableButtons();
