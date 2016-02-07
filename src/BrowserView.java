@@ -92,17 +92,25 @@ public class BrowserView {
      * Display given URL.
      */
     public void showPage (String url) {
-    	try {
-    		URL valid = myModel.go(url);
-    		if (valid != null) {
-    			update(valid);
-    		}
-    	}
-    	catch (BrowserException e) {
-    		//String.format(myResources.getString("ErrorOnGo"), url);
-    		showError(e.getMessage());
-
-    	}
+//<<<<<<< HEAD
+//    	try {
+//    		URL valid = myModel.go(url);
+//    		if (valid != null) {
+//    			update(valid);
+//    		}
+//    	}
+//    	catch (BrowserException e) {
+//    		//String.format(myResources.getString("ErrorOnGo"), url);
+//    		showError(e.getMessage());
+//
+//    	}
+//=======
+        try {
+            update(myModel.go(url));
+        }
+        catch (BrowserException e) {
+            showError(e.getMessage());
+        }
     }
 
     /**
@@ -147,8 +155,8 @@ public class BrowserView {
     // change page to favorite choice
     private void showFavorite (String favorite) {
         showPage(myModel.getFavorite(favorite).toString());
-        // reset favorites ComboBox so the same choice can be made again
-        //myFavorites.setValue(null);
+        // reset favorites so the same choice can be made again
+        // myFavorites.setValue(null);
     }
 
     // update just the view to display given URL
@@ -230,15 +238,21 @@ public class BrowserView {
     private Node makePreferencesPanel () {
         HBox result = new HBox();
         myFavorites = new ComboBox<String>();
-        myFavorites.setOnAction(event -> {
-        	//System.out.println(myFavorites.getValue());
-        	showFavorite(myFavorites.getValue());
-        });
+//<<<<<<< HEAD
+//        myFavorites.setOnAction(event -> {
+//        	//System.out.println(myFavorites.getValue());
+//        	showFavorite(myFavorites.getValue());
+//        });
+//        result.getChildren().add(myFavorites);
+//        
+//        result.getChildren().add(makeButton("AddFavoriteCommand", event -> {
+//        	addFavorite();
+//        }));
+//=======
+        myFavorites.setPromptText(myResources.getString("FavoriteFirstItem"));
+        myFavorites.valueProperty().addListener((o, s1, s2) -> showFavorite(s2));
+        result.getChildren().add(makeButton("AddFavoriteCommand", event -> addFavorite()));
         result.getChildren().add(myFavorites);
-        
-        result.getChildren().add(makeButton("AddFavoriteCommand", event -> {
-        	addFavorite();
-        }));
         result.getChildren().add(makeButton("SetHomeCommand", event -> {
             myModel.setHome();
             enableButtons();
@@ -275,16 +289,17 @@ public class BrowserView {
     // display page
     // very old style way create a callback (inner class)
     private class ShowPage implements EventHandler<ActionEvent> {
-        @Override      
-        public void handle (ActionEvent event) {       
-            showPage(myURLDisplay.getText());      
-        }      
+        @Override
+        public void handle (ActionEvent event) {
+            showPage(myURLDisplay.getText());
+        }
     }
 
 
     // Inner class to deal with link-clicks and mouse-overs Mostly taken from
     //   http://blogs.kiyut.com/tonny/2013/07/30/javafx-webview-addhyperlinklistener/
     private class LinkListener implements ChangeListener<State> {
+        public static final String HTML_LINK = "href";
         public static final String EVENT_CLICK = "click";
         public static final String EVENT_MOUSEOVER = "mouseover";
         public static final String EVENT_MOUSEOUT = "mouseout";
@@ -293,7 +308,7 @@ public class BrowserView {
         public void changed (ObservableValue<? extends State> ov, State oldState, State newState) {
             if (newState == Worker.State.SUCCEEDED) {
                 EventListener listener = event -> {
-                    final String href = ((Element)event.getTarget()).getAttribute("href");
+                    final String href = ((Element)event.getTarget()).getAttribute(HTML_LINK);
                     if (href != null) {
                         String domEventType = event.getType();
                         if (domEventType.equals(EVENT_CLICK)) {
